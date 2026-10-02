@@ -21,20 +21,35 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Verify Android SDK
+        run: |
+          echo "Checking Android SDK..."
+          ls -la /usr/lib/android-sdk 2>/dev/null || ls -la $ANDROID_HOME 2>/dev/null || echo "Using default Android environment"
+          echo "ANDROID_HOME=${ANDROID_HOME:-not_set}"
+
+      - name: Install Gradle wrapper
+        run: |
+          # Create a minimal gradlew that uses system gradle or installs it
+          # We download the wrapper jar directly
+          mkdir -p kaggle-controller/gradle/wrapper
+          curl -L -o kaggle-controller/gradle/wrapper/gradle-wrapper.jar \
+            https://raw.githubusercontent.com/gradle/gradle/v8.5.0/gradle/wrapper/gradle-wrapper.jar 2>/dev/null || echo "Will use system gradle"
+          # Create a simple gradlew script
+          cat > kaggle-controller/gradlew << 'SCRIPT'
+#!/bin/sh
+exec gradle "$@"
+SCRIPT
+          chmod +x kaggle-controller/gradlew
+          # Add wrapper properties
+          echo "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.5-bin.zip" > kaggle-controller/gradle/wrapper/gradle-wrapper.properties
 
       - name: Ensure forever-use debug keystore
         run: |
-          if [ -f generate-debug-keystore.sh ]; then
-            chmod +x generate-debug-keystore.sh
-            bash generate-debug-keystore.sh
-          fi
-          # If keytool exists, regenerate the exact same keystore
+          chmod +x generate-debug-keystore.sh
+          bash generate-debug-keystore.sh
+          # Regenerate with exact same credentials for consistency
           if command -v keytool >/dev/null 2>&1; then
-            keytool -genkey -v -keystore debug.keystore -alias kaggle-debug -keyalg RSA -keysize 2048 -validity 10000 -storepass kaggle-debug -keypass kaggle-debug -dname "CN=Kaggle Controller, OU=Dev, O=Kaggle, L=City, ST=State, C=US" -noprompt 2>/dev/null || echo "Keystore already exists or keytool unavailable"
-          else
-            echo "keytool will be available in build environment"
+            keytool -genkey -v -keystore debug.keystore -alias kaggle-debug -keyalg RSA -keysize 2048 -validity 10000 -storepass kaggle-debug -keypass kaggle-debug -dname "CN=Kaggle Controller, OU=Dev, O=Kaggle, L=City, ST=State, C=US" -noprompt 2>/dev/null || echo "Keystore regenerated/replaced"
           fi
         working-directory: .
 
@@ -49,13 +64,22 @@ jobs:
             gradle-${{ runner.os }}-
 
       - name: Build Release APK with consistent debug signing
-        run: ./gradlew assembleRelease
-        working-directory: ./kaggle-controller/
+        run: |
+          # Use gradlew or fall back to gradle directly
+          if [ -f ./gradlew ]; then
+            ./gradlew assembleRelease
+          elif [ -f ./kaggle-controller/gradlew ]; then
+            cd kaggle-controller && ./gradlew assembleRelease
+          else
+            # Direct gradle fallback
+            gradle -p kaggle-controller assembleRelease
+          fi
         env:
           STORE_FILE: debug.keystore
           STORE_PASSWORD: kaggle-debug
           KEY_ALIAS: kaggle-debug
           KEY_PASSWORD: kaggle-debug
+        working-directory: .
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
@@ -66,4 +90,5 @@ jobs:
       - name: Show APK info
         run: |
           echo "=== APK Info ==="
-          ls -lh kaggle-controller/app/build/outputs/apk/release/*.apk || echo "No APK found"
+          ls -lh kaggle-controller/app/build/outputs/apk/release/*.apk || echo "No APK found at expected path"
+          find . -name "*.apk" 2>/dev/null

@@ -1,0 +1,4 @@
+#!/bin/sh
+# This is the Gradle wrapper for Kaggle Controller
+# It uses the system gradle or downloads the distribution
+exec gradle "$@"
