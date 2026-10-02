@@ -15,21 +15,22 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Download and use Gradle 8.5 (compatible with AGP 8.2.2)
+      - name: Download Gradle 8.5 and use directly
         run: |
           curl -L -o gradle-8.5-bin.zip https://services.gradle.org/distributions/gradle-8.5-bin.zip
           unzip -q gradle-8.5-bin.zip
-          echo "GRADLE_8_5=$PWD/gradle-8.5" >> $GITHUB_ENV
+          echo "GRADLE_HOME=$PWD/gradle-8.5" >> $GITHUB_ENV
           echo "$PWD/gradle-8.5/bin" >> $GITHUB_PATH
-          echo "Using Gradle: $(gradle --version | head -1)"
+          gradle --version
       - name: Regenerate debug keystore
         run: |
           bash generate-debug-keystore.sh || true
           keytool -genkey -v -keystore debug.keystore -alias kaggle-debug -keyalg RSA -keysize 2048 -validity 10000 -storepass kaggle-debug -keypass kaggle-debug -dname "CN=Kaggle Controller, OU=Dev, O=Kaggle" -noprompt 2>/dev/null || echo "Keystore OK"
       - name: Build Release APK (full R8 v8a)
         run: |
+          export PATH="$PWD/gradle-8.5/bin:$PATH"
           cd kaggle-controller
-          bash gradlew assembleRelease --stacktrace --info
+          gradle assembleRelease --stacktrace --info
         env:
           STORE_FILE: ../debug.keystore
           STORE_PASSWORD: kaggle-debug
@@ -46,4 +47,4 @@ jobs:
         if: always()
         run: |
           echo "=== APK INFO ==="
-          find . -name "*.apk" 2>/dev/null || echo "No APK"
+          find . -name "*.apk" 2>/dev/null || echo "No APK found"
