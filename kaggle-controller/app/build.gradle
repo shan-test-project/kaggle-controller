@@ -43,11 +43,11 @@ android {
             versionNameSuffix "-debug"
         }
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Always use the same debug keystore for every build (forever-use debug signing)
+            // Full R8 enabled for v8a APK
             signingConfig signingConfigs.release
-            // versionName is set in defaultConfig; using versionNameSuffix only for release overrides
         }
     }
 
