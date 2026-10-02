@@ -18,14 +18,11 @@ jobs:
       - name: Regenerate debug keystore
         run: |
           bash generate-debug-keystore.sh || true
-          # Always regenerate with same credentials
           keytool -genkey -v -keystore debug.keystore -alias kaggle-debug -keyalg RSA -keysize 2048 -validity 10000 -storepass kaggle-debug -keypass kaggle-debug -dname "CN=Kaggle Controller, OU=Dev, O=Kaggle" -noprompt 2>/dev/null || echo "Keystore OK"
-        working-directory: .
-      - name: Build APK
+      - name: Build Release APK
         run: |
-          # Try using the gradlew wrapper
           cd kaggle-controller
-          bash gradlew assembleRelease || bash gradlew assembleDebug || echo "Build attempted"
+          bash gradlew assembleRelease --stacktrace --info || bash gradlew assembleDebug --stacktrace --info
         env:
           STORE_FILE: ../debug.keystore
           STORE_PASSWORD: kaggle-debug
@@ -38,3 +35,10 @@ jobs:
           name: KaggleController-v1.0.0001-release
           path: |
             kaggle-controller/app/build/outputs/apk/**/*.apk
+      - name: Show APK info
+        if: always()
+        run: |
+          echo "=== APK Info ==="
+          find . -name "*.apk" 2>/dev/null
+          ls -lh kaggle-controller/app/build/outputs/apk/release/*.apk 2>/dev/null || echo "No release APK"
+          ls -lh kaggle-controller/app/build/outputs/apk/debug/*.apk 2>/dev/null || echo "No debug APK"
