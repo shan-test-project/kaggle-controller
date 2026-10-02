@@ -1,4 +1,5 @@
 #!/bin/sh
-# This is the Gradle wrapper for Kaggle Controller
-# It uses the system gradle or downloads the distribution
-exec gradle "$@"
+# Gradle wrapper script
+# Uses the wrapper jar to download/run the specified Gradle version
+
+exec java -classpath "gradle/wrapper/gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain "$@"
