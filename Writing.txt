@@ -1,0 +1,1859 @@
+Build a complete, production-quality Android application called Kaggle Controller using Kotlin + Jetpack Compose + Material 3.
+
+This must NOT be a basic Kaggle API wrapper.
+
+The goal is to build a full-featured mobile Kaggle control center / mobile IDE that allows the user to do as much as reasonably possible from Android that they can do on Kaggle's website, while adding powerful mobile-only features for automation, organization, monitoring, offline work, and developer productivity.
+
+The user's Android phone communicates directly with Kaggle through the official supported API/OAuth mechanisms.
+
+There must be NO custom backend server.
+
+Use the attached Kaggle Controller concept image as the visual direction. Improve it substantially and make the application look like a polished modern 2026 developer application.
+
+IMPORTANT:
+Before implementing any Kaggle feature, verify the CURRENT official Kaggle documentation/API capability.
+
+Never invent undocumented Kaggle API endpoints.
+
+When a website feature cannot currently be performed through the public API, provide a clearly labelled fallback such as:
+
+"Open in Kaggle"
+
+using the user's browser/custom tab.
+
+Do not fake an API operation.
+
+============================================================
+
+1. PRODUCT VISION
+   ============================================================
+
+The application should feel like:
+
+Kaggle + Jupyter + VS Code + mobile automation dashboard
+
+designed specifically for Android.
+
+Primary goals:
+
+1. Manage Kaggle notebooks.
+2. Create, edit and import notebooks.
+3. Execute notebooks.
+4. Monitor running jobs.
+5. View logs and outputs.
+6. Manage datasets.
+7. Manage models.
+8. Manage competitions.
+9. Manage submissions.
+10. Browse discussions/forums where supported.
+11. Manage schedules.
+12. Manage versions.
+13. Work offline with local drafts.
+14. Automate repetitive tasks.
+15. Provide a powerful mobile coding experience.
+16. Provide optional AI-assisted coding/debugging.
+17. Provide an excellent experience on low-end Android phones.
+
+============================================================
+2. MAIN NAVIGATION
+
+Use a modern adaptive navigation system.
+
+Phone:
+
+Bottom navigation:
+
+HOME
+NOTEBOOKS
+SCHEDULES
+EXPLORE
+FILES
+
+More features can be opened from a "More" screen.
+
+Tablet/foldable:
+
+Navigation rail or navigation drawer.
+
+Main sections:
+
+Home
+Notebooks
+Runs
+Schedules
+Datasets
+Models
+Competitions
+Discussions
+Files
+Templates
+AI Assistant
+Settings
+
+============================================================
+3. HOME DASHBOARD
+
+Create a real dashboard rather than a generic landing page.
+
+Display:
+
+- Kaggle account
+- Connection status
+- Running notebooks
+- Queued notebooks
+- Recent runs
+- Failed runs
+- Upcoming scheduled runs
+- Recent notebooks
+- Favorite notebooks
+- Recently downloaded datasets
+- Recently used models
+- Competition activity
+
+Quick actions:
+
++ New Notebook
+  ▶ Run Notebook
+  📥 Import Notebook
+  📂 Files
+  ⏰ Schedule
+  📊 Dataset
+  🤖 Model
+  🏆 Competition
+
+Also show useful statistics where data is available:
+
+- Runs this week
+- Successful runs
+- Failed runs
+- Average runtime
+- Favorite compute type
+- Number of active schedules
+
+Do not manufacture data.
+
+============================================================
+4. UNIVERSAL KAGGLE SEARCH
+
+Build a global Kaggle search interface.
+
+Search across supported resources:
+
+- Notebooks
+- Datasets
+- Models
+- Competitions
+- Users
+- Discussions/forums where available
+- Benchmarks where available
+
+Provide filters.
+
+Notebook filters:
+
+- Language
+- Tags
+- Recent
+- Popular
+- User
+- Competition
+- Dataset
+
+Dataset filters:
+
+- Topic
+- Size
+- Updated
+- Owner
+
+Model filters:
+
+- Framework
+- Organization
+- Model family
+- Updated
+
+Competition filters:
+
+- Active
+- Upcoming
+- Completed
+- Category
+
+Use pagination/infinite scrolling.
+
+Do not download huge search results into memory.
+
+============================================================
+5. NOTEBOOK MANAGER
+
+Create a powerful notebook library.
+
+Categories:
+
+ALL
+RECENT
+RUNNING
+SCHEDULED
+FAILED
+FAVORITES
+LOCAL DRAFTS
+SHARED/OTHER
+
+Each notebook card:
+
+- Title
+- Owner
+- Language
+- Last updated
+- Last run
+- Run status
+- Runtime
+- Compute
+- Schedule
+- Favorite
+- Local changes indicator
+
+Actions:
+
+Open
+Edit
+Run
+Duplicate/fork where supported
+Download
+Pull
+Push
+Delete
+Favorite
+Share
+Open in Kaggle
+View versions
+View logs
+View outputs
+
+============================================================
+6. NOTEBOOK EDITOR
+
+Build a genuine mobile notebook editor.
+
+Support:
+
+Python
+R
+Markdown
+RMarkdown
+Scripts where supported
+
+Notebook cell actions:
+
+- Add
+- Delete
+- Duplicate
+- Move
+- Collapse
+- Expand
+- Convert type where supported
+- Run
+- Copy
+- Paste
+- Select
+- Multi-select where practical
+
+Editor features:
+
+- Syntax highlighting
+- Line numbers
+- Current-line highlight
+- Bracket matching
+- Auto indentation
+- Search
+- Find/replace
+- Undo/redo
+- Word wrap
+- Font-size control
+- Tab-size control
+- Code folding where practical
+- Basic autocomplete
+
+Create a mobile keyboard toolbar:
+
+TAB
+INDENT
+(
+)
+[
+]
+{
+}
+:
+_
+/
+
+COPY
+PASTE
+UNDO
+REDO
+RUN
+
+Make the editor excellent for phones.
+
+Do not make a desktop IDE merely shrink onto a phone.
+
+============================================================
+7. SCRIPT MODE
+
+Support Kaggle script-style workflows.
+
+Allow switching between:
+
+Notebook
+Python Script
+R Script
+RMarkdown
+
+Provide a clean single-file editor for scripts.
+
+Show execution controls and console output.
+
+============================================================
+8. NOTEBOOK IMPORT / EXPORT
+
+Android file picker.
+
+Import:
+
+.ipynb
+.py
+.r
+.rmd
+supported metadata/configuration files
+
+Export:
+
+.ipynb
+.py
+.r
+Markdown
+logs
+output files
+
+Share through Android Share Sheet.
+
+Allow:
+
+"Open with"
+"Save to device"
+"Share"
+
+============================================================
+9. LOCAL DRAFTS
+
+Create a robust local draft system.
+
+Auto-save while editing.
+
+Display:
+
+Saved locally
+Syncing
+Synced
+Unsaved changes
+Remote changes detected
+
+Store local notebook state efficiently.
+
+If offline:
+
+Allow editing normally.
+
+When back online:
+
+Offer synchronization.
+
+============================================================
+10. VERSION CONTROL FOR NOTEBOOKS
+
+Create a visual version history.
+
+Show:
+
+Version
+Date
+Status
+Runtime
+Compute
+Description
+Changes where available
+
+Allow:
+
+Open
+Download
+Compare
+Restore/copy
+Open in Kaggle
+
+Create a mobile diff viewer.
+
+Use side-by-side diff on tablets and an easy toggle-based diff on phones.
+
+============================================================
+11. EXECUTION CONTROL CENTER
+
+Create a central "Runs" section.
+
+Display:
+
+Running
+Queued
+Completed
+Failed
+Cancelled
+
+Each run includes:
+
+- Notebook
+- Version
+- Start time
+- End time
+- Duration
+- Compute type
+- Accelerator
+- Status
+- Output availability
+
+Actions:
+
+Run
+Retry
+Stop/cancel when supported
+Open logs
+Open outputs
+Download outputs
+
+============================================================
+12. LIVE RUN MONITOR
+
+Create a detailed live monitor.
+
+Top section:
+
+Notebook
+Status
+Compute
+Elapsed time
+
+Middle:
+
+Live log console
+
+Bottom:
+
+Output/files
+
+Add:
+
+Pause auto-scroll
+Resume auto-scroll
+Search
+Copy
+Share log
+Jump to error
+Jump to latest
+
+Polling must be intelligent.
+
+Do not constantly query Kaggle.
+
+Use backoff.
+
+Stop polling when the run finishes.
+
+Reduce polling when the app goes into the background.
+
+============================================================
+13. NOTIFICATIONS
+
+Android notifications for:
+
+Run started
+Run completed
+Run failed
+Scheduled run started
+Scheduled run completed
+Scheduled run failed
+Authentication expiry
+Sync conflict
+Download complete
+
+Allow per-notification-category controls.
+
+============================================================
+14. SCHEDULER
+
+Build a first-class automation center.
+
+Support Kaggle's actual supported notebook scheduling features.
+
+Time-based:
+
+Daily
+Weekly
+Monthly
+
+Dataset-update trigger where supported.
+
+Display:
+
+Notebook
+Trigger
+Next run
+Last run
+Status
+
+Actions:
+
+Enable
+Disable
+Edit
+Delete
+Run now
+View history
+
+Also provide optional Android-side scheduling.
+
+Clearly distinguish:
+
+KAGGLE SERVER SCHEDULE
+
+and
+
+ANDROID LOCAL SCHEDULE
+
+Never pretend they are identical.
+
+A local schedule must warn that Android/network availability and background execution restrictions can affect it.
+
+============================================================
+15. AUTOMATION RULES
+
+Add an advanced mobile-only automation system.
+
+Examples:
+
+"When notebook finishes successfully → download selected outputs."
+
+"When notebook fails → send notification."
+
+"Every Monday → run notebook."
+
+"When output file appears → download it."
+
+"When dataset changes → trigger notebook if supported."
+
+"Run notebook A → then notebook B."
+
+"Run notebook → if success, run another notebook."
+
+Build a visual automation editor.
+
+Example:
+
+TRIGGER
+↓
+RUN NOTEBOOK A
+↓
+CHECK RESULT
+↓
+SUCCESS?
+↙       ↘
+YES       NO
+↓          ↓
+RUN B     NOTIFY
+
+Do not create automation that bypasses Kaggle restrictions.
+
+============================================================
+16. WORKFLOW / PIPELINE BUILDER
+
+Create a visual workflow builder.
+
+Allow users to chain Kaggle notebooks.
+
+Node types:
+
+Notebook
+Condition
+Delay
+Notification
+Download
+Upload
+Dataset operation
+End
+
+Save workflows locally.
+
+Run a workflow manually or through available scheduling mechanisms.
+
+Show workflow execution history.
+
+============================================================
+17. DATASETS
+
+Create a full Dataset section.
+
+Support supported Kaggle operations:
+
+Search
+Browse
+View details
+View versions
+Download
+Create
+Update
+Delete where permitted
+Upload files
+Publish new versions
+Add to notebooks
+
+Dataset detail page:
+
+Overview
+Files
+Versions
+Usage
+Notebooks
+Metadata
+Open in Kaggle
+
+For large files:
+
+Stream/download progressively.
+
+Never load huge files entirely into memory.
+
+============================================================
+18. DATASET BUILDER
+
+Add a mobile Dataset Manager.
+
+Allow:
+
+Create dataset
+Pick Android files
+Add description
+Configure visibility
+Add metadata
+Upload
+Create new version
+
+Before uploading:
+
+Show:
+
+Total size
+File count
+Estimated upload progress
+
+Support resumable/retry behavior where technically possible.
+
+============================================================
+19. MODELS
+
+Full Models section.
+
+Support supported API functionality:
+
+Search
+Browse
+View details
+View versions
+Download supported files
+Create
+Update
+Delete
+Attach to notebooks
+
+Model page:
+
+Overview
+Versions
+Files
+Usage
+Related notebooks
+Open in Kaggle
+
+============================================================
+20. COMPETITIONS
+
+Do not ignore the competition side of Kaggle.
+
+Create:
+
+Competition browser
+Competition details
+Competition data
+Rules
+Leaderboard where available
+Submissions
+Submission history
+
+Support documented competition API capabilities such as:
+
+- Discover competitions
+- Read competition metadata
+- Download competition data
+- Participate where supported
+- Submit predictions
+- View submission information
+
+Competition detail screen:
+
+Overview
+Rules
+Data
+Notebooks
+Leaderboard
+Submissions
+Discussion
+Open in Kaggle
+
+Show explicit warnings before submission actions.
+
+Never accidentally submit a file.
+
+============================================================
+21. SUBMISSION MANAGER
+
+Create a submission center.
+
+Show:
+
+Competition
+File
+Timestamp
+Status
+Score where returned
+Message
+
+Actions:
+
+View
+Download submission
+Open competition
+
+Add:
+
+"Submit this output file"
+
+from a notebook run.
+
+This creates a very useful flow:
+
+RUN NOTEBOOK
+↓
+GENERATE submission.csv
+↓
+SELECT OUTPUT
+↓
+REVIEW
+↓
+SUBMIT
+
+Require confirmation before final submission.
+
+============================================================
+22. DISCUSSIONS / FORUMS
+
+Where the current API permits it, provide:
+
+Forum browsing
+Topics
+Messages
+Create topic
+Reply
+Edit own content where supported
+Delete own content where supported
+
+Use:
+
+Unread
+Recent
+Following/bookmarked locally
+
+When an operation is unsupported:
+
+Open in Kaggle
+
+============================================================
+23. BENCHMARKS
+
+Add a Benchmarks section if supported by the current Kaggle API.
+
+Support:
+
+Browse
+Search/list
+View
+Create
+Update
+Delete
+
+Display benchmark metadata and related information available through the API.
+
+============================================================
+24. KAGGLE INPUT MANAGEMENT
+
+Inside the notebook editor, create an Input panel.
+
+Organize:
+
+Datasets
+Models
+Competitions
+Notebook outputs
+
+Allow adding/removing supported inputs.
+
+Show:
+
+Name
+Owner
+Version
+Size
+
+Provide a search interface.
+
+The user should be able to find an input and attach it without leaving the editor.
+
+============================================================
+25. OUTPUT MANAGEMENT
+
+Create a unified output browser.
+
+Categories:
+
+Images
+CSV
+JSON
+TXT
+Parquet
+ZIP
+Models
+Other files
+
+Provide previews where practical.
+
+CSV preview:
+
+- column headers
+- row count where known
+- horizontal scrolling
+
+JSON:
+
+formatted viewer
+
+Images:
+
+thumbnail/gallery
+
+Text:
+
+syntax-highlighted viewer
+
+Large binary files:
+
+metadata + download
+
+============================================================
+26. PACKAGE MANAGER
+
+Provide a mobile package helper.
+
+Allow users to create an installation cell from:
+
+Package name
+Version
+Multiple packages
+
+Examples:
+
+pip
+conda when available in environment
+apt/system package suggestions where appropriate
+
+Generate safe installation commands.
+
+Do NOT silently execute package installation.
+
+Provide:
+
+"Insert into notebook"
+
+and:
+
+"Run installation"
+
+Only execute through the actual notebook environment.
+
+============================================================
+27. ENVIRONMENT INSPECTOR
+
+Add:
+
+"Environment"
+
+Show information that is available from notebook execution/logs:
+
+Python version
+OS
+Installed packages
+CUDA information where available
+GPU information where available
+CPU information where available
+RAM information where available
+Disk information where available
+
+Provide one-tap generated diagnostic cell.
+
+Example:
+
+Check environment
+Check GPU
+Check disk
+Check Python
+List packages
+
+============================================================
+28. RESOURCE MONITOR
+
+Create a mobile-friendly resource dashboard when information can be obtained from the running notebook.
+
+Display:
+
+CPU
+RAM
+GPU
+GPU memory
+Disk
+Runtime
+
+Use compact graphs.
+
+Do not claim real-time measurements when Kaggle does not provide them directly.
+
+The app may generate diagnostic cells to collect this information.
+
+============================================================
+29. AI ASSISTANT
+
+Add an optional AI coding assistant.
+
+IMPORTANT:
+
+This is an optional feature and must NOT send user code anywhere unless the user explicitly enables/configures an AI provider.
+
+Support configurable providers such as:
+
+OpenAI-compatible APIs
+Google/Gemini-compatible APIs
+DeepSeek-compatible APIs
+Other user-configurable OpenAI-compatible endpoints
+
+The user supplies their own API key.
+
+Features:
+
+Explain selected code
+Fix error
+Explain traceback
+Generate code
+Complete code
+Optimize code
+Convert Python/R
+Generate Markdown
+Write documentation
+Generate tests
+Analyze notebook output
+Summarize logs
+Suggest package installation
+Explain dataset errors
+
+Buttons:
+
+Explain
+Fix
+Improve
+Generate
+Test
+
+When fixing code:
+
+Show a diff first.
+
+Never automatically replace the user's code without confirmation.
+
+============================================================
+30. ERROR COPILOT
+
+When a notebook run fails:
+
+Detect the error from available logs.
+
+Display:
+
+ERROR
+CAUSE
+LIKELY FIX
+AFFECTED CELL
+SUGGESTED CODE
+
+Provide:
+
+Copy fix
+Insert fix
+Ask AI
+Open logs
+
+Do not claim certainty when the diagnosis is only an inference.
+
+============================================================
+31. CODE SNIPPET LIBRARY
+
+Add a local reusable snippet system.
+
+Categories:
+
+PyTorch
+TensorFlow
+Transformers
+Pandas
+NumPy
+Visualization
+Data loading
+GPU diagnostics
+File management
+Training
+Inference
+
+Allow:
+
+Save snippet
+Edit
+Favorite
+Insert into notebook
+Search
+
+============================================================
+32. NOTEBOOK TEMPLATES
+
+Create local templates.
+
+Examples:
+
+Blank Python
+Data analysis
+PyTorch training
+Transformers inference
+CPU AI experiment
+GPU training
+Competition starter
+Dataset preprocessing
+
+Users can create their own templates.
+
+============================================================
+33. QUICK ACTIONS
+
+Long-press notebook:
+
+Run
+Open editor
+View logs
+View output
+Schedule
+Duplicate
+Download
+Share
+Open in Kaggle
+
+Long-press output file:
+
+Preview
+Download
+Share
+Submit to competition where applicable
+
+============================================================
+34. SHARE / DEEP LINKS
+
+Support Android sharing.
+
+From Kaggle URLs:
+
+Detect Kaggle notebook/dataset/model/competition links.
+
+Example:
+
+Share Kaggle URL
+↓
+Kaggle Controller
+↓
+Open matching resource inside app
+
+If authentication is required, route to login.
+
+============================================================
+35. "OPEN IN KAGGLE" FALLBACK
+
+This is critical.
+
+For any feature that is available on Kaggle's website but cannot currently be performed through the public API:
+
+Provide:
+
+Open in Kaggle
+
+Use Android Custom Tabs/browser.
+
+Examples may include website-only settings or interactions.
+
+Do not pretend the API supports them.
+
+Track API capability in one place so future changes are easy to implement.
+
+============================================================
+36. WEB FEATURE PARITY MAP
+
+Create an internal capability registry.
+
+For every feature:
+
+SUPPORTED_BY_API
+SUPPORTED_BY_WEBSITE_ONLY
+PARTIALLY_SUPPORTED
+UNSUPPORTED
+
+The UI should automatically determine the correct action.
+
+Example:
+
+RUN NOTEBOOK
+→ API
+
+SOME WEBSITE-ONLY SETTING
+→ Open in Kaggle
+
+This prevents broken functionality.
+
+============================================================
+37. ACCOUNT / PROFILE
+
+Create an account section.
+
+Show information available from Kaggle.
+
+Provide:
+
+Account
+Connection
+Permissions
+Authentication
+Recent activity where supported
+
+Allow switching/re-authentication.
+
+Design architecture to support multiple accounts in the future, even if the first version supports one active account.
+
+============================================================
+38. SECURE CREDENTIAL STORAGE
+
+Never hardcode:
+
+API keys
+OAuth secrets
+refresh tokens
+
+Never print them in:
+
+Logcat
+Exceptions
+Crash reports
+Analytics
+
+Use secure Android storage.
+
+Use minimum required OAuth scopes.
+
+Request permissions progressively rather than requesting everything unnecessarily.
+
+============================================================
+39. RATE LIMIT PROTECTION
+
+Kaggle uses dynamic rate limiting.
+
+Implement:
+
+Request deduplication
+Caching
+Exponential backoff
+429 handling
+Polling throttling
+
+Never create request loops.
+
+Show a useful message when rate limited.
+
+============================================================
+40. OFFLINE MODE
+
+The user should still be able to:
+
+Browse cached notebooks
+Edit local notebooks
+View cached logs
+View cached outputs
+Manage snippets
+Use templates
+Inspect previous runs
+
+Show:
+
+Offline
+Cached
+Sync pending
+
+Never pretend data is current when it is cached.
+
+============================================================
+41. SYNC ENGINE
+
+Create a centralized sync engine.
+
+Sync:
+
+Notebook metadata
+Drafts
+Run history
+Schedules
+Favorites
+Tags
+Local configuration
+
+Queue operations that can safely be retried.
+
+Handle:
+
+Success
+Failed
+Conflict
+Unsupported
+Offline
+
+============================================================
+42. FILE TRANSFER CENTER
+
+Create a dedicated transfer screen.
+
+Show:
+
+Uploads
+Downloads
+
+Each item:
+
+Filename
+Size
+Progress
+Speed
+ETA
+Status
+
+Actions:
+
+Pause where supported
+Cancel
+Retry
+Open
+Share
+
+Limit concurrency to avoid destroying performance.
+
+============================================================
+43. DOWNLOAD MANAGER
+
+Allow downloading:
+
+Notebook files
+Dataset files
+Model files
+Run outputs
+Logs
+
+Use Android DownloadManager where appropriate or an efficient internal downloader.
+
+Support:
+
+Background downloads
+Notifications
+Retry
+Resume where server/API permits
+
+============================================================
+44. STORAGE MANAGER
+
+Create:
+
+Cache size
+Downloads
+Local notebooks
+Outputs
+Drafts
+
+Show storage usage.
+
+Allow:
+
+Clear cache
+Delete downloads
+Manage local files
+
+Never delete drafts without confirmation.
+
+============================================================
+45. RUN HISTORY ANALYTICS
+
+Create local analytics from recorded runs.
+
+Charts:
+
+Runs per week
+Success/failure ratio
+Runtime trend
+Most-used notebooks
+Recent failures
+
+This is local app analytics based on the user's own retrieved data.
+
+============================================================
+46. FAVORITES / TAGS / SMART COLLECTIONS
+
+Local organization:
+
+Favorites
+Tags
+Pinned
+Archive
+
+Smart collections:
+
+Recently failed
+Frequently run
+Never run
+Has local changes
+Scheduled
+Downloaded
+
+============================================================
+47. MULTI-NOTEBOOK WORKSPACE
+
+Allow the user to keep several notebooks open conceptually.
+
+Phone:
+
+Recently opened tabs
+
+Tablet:
+
+Two-pane or multi-pane layout.
+
+Allow quick switching between:
+
+Editor
+Logs
+Output
+Another notebook
+
+Do not actually keep multiple expensive runtime sessions alive unnecessarily.
+
+============================================================
+48. COMMAND PALETTE
+
+Add a developer-style command palette.
+
+Search actions:
+
+Run notebook
+Save
+Push
+Pull
+Open logs
+Schedule
+Download output
+Create notebook
+Add dataset
+Add model
+Search Kaggle
+Open settings
+
+Keyboard shortcut support for tablets/physical keyboards.
+
+============================================================
+49. KEYBOARD-FIRST MODE
+
+For users with Bluetooth keyboards:
+
+Support shortcuts such as:
+
+Ctrl+S
+Ctrl+F
+Ctrl+Z
+Ctrl+Shift+Z
+Ctrl+Enter
+
+Use platform-appropriate Android keyboard handling.
+
+============================================================
+50. TABLET / FOLDABLE UI
+
+Do not design only for phones.
+
+For larger screens:
+
+Three-pane notebook layout:
+
+Notebook cells
+Logs/output
+Inputs/files
+
+Use adaptive Compose layouts.
+
+============================================================
+51. THEMING
+
+Include:
+
+System theme
+Light
+Dark
+AMOLED
+
+Allow user-controlled:
+
+Dynamic colors
+Editor font size
+Editor font family where available
+Code density
+Animation level
+
+============================================================
+52. ACCESSIBILITY
+
+Support:
+
+TalkBack
+Content descriptions
+Large text
+Touch targets
+Contrast
+Keyboard navigation
+
+Do not rely only on color to indicate states.
+
+============================================================
+53. PERFORMANCE FOR LOW-END PHONES
+
+The app must run well on older Android hardware.
+
+Avoid:
+
+Huge memory allocations
+Constant recomposition
+Large image caches
+Unbounded logs
+Aggressive polling
+Heavy animations
+Unnecessary background services
+
+Use:
+
+LazyColumn
+Lazy grids
+Paging
+Incremental loading
+Bounded caches
+Coroutine dispatchers
+Lifecycle-aware collection
+
+The editor must remain responsive.
+
+============================================================
+54. ERROR / EMPTY / LOADING STATES
+
+Every screen must have:
+
+Loading state
+Empty state
+Offline state
+Error state
+Permission error
+Unsupported-operation state
+
+Do not display blank screens when the API fails.
+
+============================================================
+55. SECURITY / PRIVACY
+
+No telemetry by default.
+
+If analytics is ever added:
+
+- Opt-in
+- Clearly documented
+- No source code
+- No API keys
+- No notebook secrets
+
+Never send notebook content to a remote AI service without explicit user action.
+
+============================================================
+56. ARCHITECTURE
+
+Use a modular clean architecture.
+
+Example:
+
+app/
+core/
+network/
+security/
+database/
+common/
+ui/
+
+data/
+kaggle/
+api/
+models/
+repository/
+local/
+
+domain/
+model/
+repository/
+usecase/
+
+feature/
+home/
+notebooks/
+editor/
+runs/
+logs/
+files/
+schedules/
+datasets/
+models/
+competitions/
+discussions/
+benchmarks/
+templates/
+assistant/
+settings/
+
+============================================================
+57. API LAYER
+
+Implement the official current Kaggle API.
+
+Create clear interfaces:
+
+KaggleAuthRepository
+KaggleNotebookRepository
+KaggleDatasetRepository
+KaggleModelRepository
+KaggleCompetitionRepository
+KaggleSubmissionRepository
+KaggleForumRepository
+KaggleBenchmarkRepository
+KaggleScheduleRepository
+KaggleFileRepository
+
+Every API operation must map to verified current API functionality.
+
+============================================================
+58. DATA MODELS
+
+Create clean Kotlin models:
+
+UserAccount
+Notebook
+NotebookVersion
+NotebookCell
+NotebookRun
+RunLog
+OutputFile
+Dataset
+DatasetVersion
+DatasetFile
+Model
+ModelVersion
+Competition
+CompetitionSubmission
+ForumTopic
+ForumMessage
+Benchmark
+Schedule
+Workflow
+WorkflowNode
+LocalDraft
+Snippet
+Template
+TransferTask
+AppSettings
+
+Use sealed state models:
+
+Loading
+Success
+Error
+Offline
+Unsupported
+Unauthorized
+RateLimited
+
+============================================================
+59. BACKGROUND WORK
+
+Use WorkManager only for appropriate Android background work.
+
+Examples:
+
+Sync
+Downloads
+Local scheduled API actions
+Notifications
+Queued uploads
+
+Do not use WorkManager to pretend Android can control a remote Kaggle session indefinitely.
+
+============================================================
+60. TESTING
+
+Write:
+
+Unit tests
+Repository tests
+ViewModel tests
+Serialization tests
+Authentication tests
+Retry/rate-limit tests
+Conflict tests
+Workflow tests
+Compose UI tests
+
+Mock Kaggle APIs.
+
+Real Kaggle credentials must NOT be required by automated tests.
+
+============================================================
+61. README
+
+Include:
+
+Project setup
+Android Studio requirements
+Kaggle API setup
+OAuth setup
+API-token setup
+Required scopes
+Security notes
+Build instructions
+Testing instructions
+Known Kaggle API limitations
+Website-only fallback behavior
+
+============================================================
+62. DEVELOPMENT STRATEGY
+
+Do not attempt to create the entire application as one giant untested implementation.
+
+Build incrementally.
+
+PHASE 1:
+Project architecture
+Theme
+Navigation
+Authentication
+Kaggle API client
+Account
+Notebook list
+
+PHASE 2:
+Notebook details
+Import/export
+Editor
+Local drafts
+Push/pull
+Execution
+
+PHASE 3:
+Runs
+Logs
+Outputs
+Downloads
+Notifications
+
+PHASE 4:
+Schedules
+Automation
+Workflow builder
+
+PHASE 5:
+Datasets
+Models
+Competitions
+Submissions
+
+PHASE 6:
+Discussions
+Benchmarks
+Templates
+Snippets
+
+PHASE 7:
+AI assistant
+Error copilot
+Advanced analytics
+
+PHASE 8:
+Offline/sync
+Performance
+Accessibility
+Tablet/foldable support
+Testing
+Polish
+
+At the end of every phase:
+
+- Build the project
+- Fix compilation errors
+- Fix runtime crashes
+- Test the feature
+- Only then continue
+
+============================================================
+63. UI QUALITY REQUIREMENTS
+
+The visual quality is extremely important.
+
+Use:
+
+Material 3
+Modern cards
+Subtle elevation
+Consistent spacing
+Smooth but lightweight transitions
+Developer-oriented typography
+Beautiful code editor
+Professional terminal/log viewer
+Good empty/error states
+Skeleton loading
+Bottom sheets
+Dialogs
+Adaptive layouts
+
+Main visual identity:
+
+Near-black/navy background
+Electric blue primary
+Cyan highlights
+White/gray text
+Clean icons
+Minimal clutter
+
+Do not make it look like an old Android admin panel.
+
+============================================================
+64. SPECIAL MOBILE-ONLY FEATURES
+
+Add features that Kaggle's website is not specifically designed around:
+
+Quick Run
+Quick Schedule
+One-tap output download
+One-tap notebook duplication
+Mobile code snippets
+Mobile keyboard toolbar
+Global command palette
+Offline drafts
+Automatic sync
+Run notifications
+Workflow automation
+Visual pipeline builder
+AI error assistant
+Android Share integration
+Deep-link handling
+Download manager
+Transfer queue
+Local notebook templates
+Smart collections
+Run analytics
+Phone-friendly file previews
+
+============================================================
+65. OPTIONAL POWER USER FEATURES
+
+Structure the architecture so future features can be added:
+
+- Multiple Kaggle accounts
+- GitHub integration
+- Git-based notebook backup
+- Local notebook backup
+- Automatic periodic backup
+- Cloud import/export
+- Advanced diff
+- Custom API endpoints
+- Additional AI providers
+- Plugin architecture
+
+Do NOT implement risky or unsupported features by faking API requests.
+
+============================================================
+66. FINAL PRINCIPLE
+
+The application must follow this rule:
+
+Kaggle API first.
+Official Kaggle website fallback second.
+Local/mobile enhancement third.
+
+Never:
+
+- invent endpoints
+- fake execution
+- fake schedules
+- fake GPU availability
+- fake API responses
+- silently overwrite notebook changes
+- expose credentials
+- bypass Kaggle restrictions or quotas
+
+When Kaggle supports something through its API:
+
+IMPLEMENT IT.
+
+When Kaggle supports something only through the website:
+
+SHOW "OPEN IN KAGGLE".
+
+When Kaggle supports something partially:
+
+IMPLEMENT the supported portion and clearly explain the limitation.
+
+The finished app should feel like a serious mobile development environment rather than a simple API client.
+
+Final product identity:
+
+Kaggle Controller
+"Your Kaggle workspace, redesigned for Android."

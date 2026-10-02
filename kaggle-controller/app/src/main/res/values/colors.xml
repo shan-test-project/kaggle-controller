@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark navy / near-black base -->
+    <color name="bg_deep">#060B18</color>
+    <color name="bg_surface">#0D1424</color>
+    <color name="bg_surface_elevated">#121B2E</color>
+    <color name="bg_surface_high">#18263A</color>
+
+    <!-- Electric cyan / blue primary -->
+    <color name="primary_electric">#00C3FF</color>
+    <color name="primary_electric_dark">#0099CC</color>
+    <color name="primary_electric_light">#66E6FF</color>
+
+    <!-- Cyan highlight -->
+    <color name="accent_cyan">#00E6E6</color>
+    <color name="accent_blue">#0077FF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#F0F4F8</color>
+    <color name="text_secondary">#8A9EB5</color>
+    <color name="text_tertiary">#4A5A70</color>
+    <color name="text_disabled">#2A3645</color>
+
+    <!-- Status -->
+    <color name="status_success">#00E676</color>
+    <color name="status_warning">#FFC107</color>
+    <color name="status_error">#FF5252</color>
+    <color name="status_info">#009CFF</color>
+
+    <!-- Border -->
+    <color name="border_subtle">#152540</color>
+    <color name="border_medium">#1D3458</color>
+</resources>
