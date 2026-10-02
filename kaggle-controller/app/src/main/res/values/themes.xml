@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.KaggleController" parent="android:Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.KaggleController" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/bg_deep</item>
         <item name="android:statusBarColor">@color/bg_deep</item>
         <item name="android:navigationBarColor">@color/bg_deep</item>
@@ -15,5 +15,8 @@
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="colorOnSurfaceVariant">@color/text_secondary</item>
         <item name="colorError">@color/status_error</item>
+        <item name="colorOnError">#FFFFFF</item>
+        <item name="colorErrorContainer">@color/status_error</item>
+        <item name="colorOutline">@color/border_medium</item>
     </style>
 </resources>
