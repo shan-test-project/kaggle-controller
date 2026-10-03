@@ -3,6 +3,8 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def signingStoreFile = rootProject.file(System.getenv("STORE_FILE") ?: "debug.keystore")
+
 android {
     namespace 'com.kaggle.controller'
     compileSdk 34
@@ -25,13 +27,13 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file("${rootDir}/debug.keystore")
+            storeFile signingStoreFile
             storePassword "kaggle-debug"
             keyAlias "kaggle-debug"
             keyPassword "kaggle-debug"
         }
         release {
-            storeFile file("${rootDir}/debug.keystore")
+            storeFile signingStoreFile
             storePassword "kaggle-debug"
             keyAlias "kaggle-debug"
             keyPassword "kaggle-debug"

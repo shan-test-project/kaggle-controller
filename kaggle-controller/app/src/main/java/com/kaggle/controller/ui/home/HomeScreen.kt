@@ -3,6 +3,8 @@ package com.kaggle.controller.ui.home
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,10 +24,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             Column(modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = androidx.compose.ui.graphics.vector.ImageVector(
-                            defaultWidth = 48.dp,
-                            defaultHeight = 48.dp,
-                        ),
+                        imageVector = Icons.Filled.Cloud,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
                         tint = ElectricCyan,
@@ -110,7 +109,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun QuickActionButton(label: String, desc: String) {
+fun RowScope.QuickActionButton(label: String, desc: String) {
     ElevatedButton(
         onClick = {},
         colors = ButtonDefaults.elevatedButtonColors(containerColor = SurfaceHigh, contentColor = TextPrimary),
@@ -124,7 +123,7 @@ fun QuickActionButton(label: String, desc: String) {
 }
 
 @Composable
-fun StatCard(label: String, value: String, color: androidx.compose.ui.graphics.Color) {
+fun RowScope.StatCard(label: String, value: String, color: androidx.compose.ui.graphics.Color) {
     Card(
         modifier = Modifier.weight(1f),
         colors = CardDefaults.cardColors(containerColor = SurfaceElevated),

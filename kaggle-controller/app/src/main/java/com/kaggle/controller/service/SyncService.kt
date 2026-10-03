@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.kaggle.controller.R
 
 class SyncService : Service() {
 
@@ -15,7 +16,7 @@ class SyncService : Service() {
         val notification = NotificationCompat.Builder(this, "sync_channel")
             .setContentTitle("Kaggle Controller")
             .setContentText("Syncing data with Kaggle...")
-            .setSmallIcon(android.R.drawable.ic_menu_sync)
+            .setSmallIcon(R.drawable.ic_schedule)
             .build()
         startForeground(1, notification)
     }
