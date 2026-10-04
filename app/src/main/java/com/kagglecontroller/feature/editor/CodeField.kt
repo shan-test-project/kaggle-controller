@@ -76,7 +76,6 @@ fun CodeField(
             textStyle = style,
             cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
             visualTransformation = transformation,
-            softWrap = wrap,
             modifier = Modifier
                 .weight(1f)
                 .let { if (focusRequester != null) it.focusRequester(focusRequester) else it }
