@@ -1,6 +1,5 @@
 package com.kagglecontroller.core.network
 
-import android.util.LruCache
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +19,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.IOException
+import java.util.LinkedHashMap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -44,7 +44,7 @@ class KaggleRpcClient(
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val inFlight = ConcurrentHashMap<String, Deferred<JsonObject>>()
-    private val cache = LruCache<String, CacheEntry>(48) // bounded cache for low-end phones
+    private val cache = BoundedLruCache<String, CacheEntry>(48) // bounded cache for low-end phones
 
     private class CacheEntry(val at: Long, val value: JsonObject)
 
@@ -77,7 +77,7 @@ class KaggleRpcClient(
 
     /** Write call: single attempt, never retried automatically, never cached. */
     suspend fun write(service: String, method: String, body: JsonObject): JsonObject {
-        cache.evictAll()
+        cache.clear()
         return execWithRetry(service, method, body, maxAttempts = 1)
     }
 
@@ -182,4 +182,29 @@ private suspend fun Call.await(): Response = suspendCancellableCoroutine { cont 
             cont.resume(response)
         }
     })
+}
+
+/** Small synchronized LRU cache that also works in local JVM unit tests. */
+private class BoundedLruCache<K : Any, V : Any>(private val maxSize: Int) {
+    private val entries = LinkedHashMap<K, V>(maxSize, 0.75f, true)
+
+    init {
+        require(maxSize > 0)
+    }
+
+    @Synchronized
+    fun get(key: K): V? = entries[key]
+
+    @Synchronized
+    fun put(key: K, value: V) {
+        entries[key] = value
+        if (entries.size > maxSize) {
+            entries.remove(entries.entries.iterator().next().key)
+        }
+    }
+
+    @Synchronized
+    fun clear() {
+        entries.clear()
+    }
 }
