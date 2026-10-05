@@ -61,7 +61,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Verify Compose dependency versions
-        run: gradle dependencyInsight --dependency androidx.compose.foundation:foundation --configuration debugCompileClasspath --console=plain
+        run: gradle :app:dependencyInsight --dependency androidx.compose.foundation:foundation --configuration debugCompileClasspath --console=plain
 
       - name: Run unit tests
         run: gradle testDebugUnitTest --stacktrace
