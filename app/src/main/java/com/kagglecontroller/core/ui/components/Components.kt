@@ -1,6 +1,8 @@
 package com.kagglecontroller.core.ui.components
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.core.RepeatMode
@@ -49,14 +51,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kagglecontroller.core.common.ApiState
 import com.kagglecontroller.core.ui.theme.KC
+import com.kagglecontroller.data.local.AppMode
+import com.kagglecontroller.data.local.SettingsStore
 import com.kagglecontroller.domain.model.RunStatus
 
 fun openInKaggle(context: Context, url: String) {
-    val intent = CustomTabsIntent.Builder().setShowTitle(true).build()
+    val fullMode = SettingsStore(context).settings.value.appMode == AppMode.FULL
     try {
-        intent.launchUrl(context, Uri.parse(url))
+        if (fullMode) {
+            CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setToolbarColor(android.graphics.Color.rgb(14, 21, 38))
+                .build()
+                .launchUrl(context, Uri.parse(url))
+        } else {
+            val external = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            if (context !is Activity) external.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(external)
+        }
     } catch (e: Exception) {
-        // No browser installed: nothing sensible to do.
+        try {
+            val fallback = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            if (context !is Activity) fallback.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(fallback)
+        } catch (_: Exception) {
+            // No browser installed.
+        }
     }
 }
 

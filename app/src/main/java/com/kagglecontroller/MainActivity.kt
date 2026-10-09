@@ -29,11 +29,15 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,6 +64,7 @@ import com.kagglecontroller.feature.files.FilesScreen
 import com.kagglecontroller.feature.home.HomeScreen
 import com.kagglecontroller.feature.more.MoreScreen
 import com.kagglecontroller.feature.notebooks.NotebooksScreen
+import com.kagglecontroller.feature.notebooks.NotebooksViewModel
 import com.kagglecontroller.feature.runs.RunScreen
 import com.kagglecontroller.feature.runs.RunsListScreen
 import com.kagglecontroller.feature.schedules.SchedulesScreen
@@ -70,9 +75,10 @@ import java.net.URLEncoder
 private object Route {
     const val HOME = "home"; const val NOTEBOOKS = "notebooks"; const val SCHEDULES = "schedules"
     const val EXPLORE = "explore"; const val FILES = "files"; const val MORE = "more"; const val RUNS = "runs"
-    const val EDITOR = "editor/{id}"; const val RUN = "run/{ref}"
+    const val EDITOR = "editor/{id}"; const val RUN = "run/{ref}"; const val REMOTE_EDITOR = "remote-editor/{ref}"
     fun editor(id: String) = "editor/$id"
     fun run(ref: String) = "run/" + URLEncoder.encode(ref, "UTF-8")
+    fun remoteEditor(ref: String) = "remote-editor/" + URLEncoder.encode(ref, "UTF-8")
 }
 
 private data class Tab(val route: String, val label: String, val icon: ImageVector)
@@ -144,7 +150,7 @@ private fun AppShell(s: AuthUi.SignedIn, link: String?, onLinkHandled: () -> Uni
     val showBars = tabs.any { t -> current?.hierarchy?.any { it.route == t.route } == true } || current?.route == Route.MORE || current?.route == Route.RUNS
 
     LaunchedEffect(link) {
-        if (link != null) { nav.navigate(Route.run(link)); onLinkHandled() }
+        if (link != null) { nav.navigate(Route.remoteEditor(link)); onLinkHandled() }
     }
 
     fun go(route: String) = nav.navigate(route) {
@@ -186,6 +192,19 @@ private fun AppShell(s: AuthUi.SignedIn, link: String?, onLinkHandled: () -> Uni
                 val ref = URLDecoder.decode(e.arguments?.getString("ref").orEmpty(), "UTF-8")
                 RunScreen(ref, onBack = { nav.popBackStack() }, onEdit = null)
             }
+            composable(Route.REMOTE_EDITOR) { e ->
+                val ref = URLDecoder.decode(e.arguments?.getString("ref").orEmpty(), "UTF-8")
+                RemoteNotebookLoader(
+                    ref = ref,
+                    onLoaded = { id ->
+                        nav.navigate(Route.editor(id)) {
+                            popUpTo(Route.REMOTE_EDITOR) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
+                    onBack = { nav.popBackStack() },
+                )
+            }
         }
     }
 
@@ -217,4 +236,31 @@ private fun AppShell(s: AuthUi.SignedIn, link: String?, onLinkHandled: () -> Uni
             },
         ) { padding -> content(Modifier.padding(padding)) }
     }
+}
+
+@Composable
+private fun RemoteNotebookLoader(ref: String, onLoaded: (String) -> Unit, onBack: () -> Unit) {
+    val vm = containerViewModel(key = "remote-notebook-$ref") { NotebooksViewModel(it) }
+    var attempt by remember(ref) { mutableIntStateOf(0) }
+    var error by remember(ref) { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(ref, attempt) {
+        error = null
+        vm.draftFromRemote(ref).fold(
+            onSuccess = onLoaded,
+            onFailure = { error = it.message ?: "Couldn't download this notebook from Kaggle." },
+        )
+    }
+
+    MessageState(
+        icon = Icons.Outlined.Code,
+        title = if (error == null) "Opening notebook" else "Couldn't open notebook",
+        body = error ?: "Downloading the notebook so it can open in the editor…",
+        actions = if (error == null) null else ({
+            androidx.compose.foundation.layout.Column {
+                Button(onClick = { attempt++ }) { Text("Try again") }
+                TextButton(onClick = onBack) { Text("Back to notebooks") }
+            }
+        }),
+    )
 }

@@ -82,8 +82,10 @@ class RunStore(context: Context) {
 }
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK, AMOLED }
+enum class AppMode { API_ONLY, FULL }
 
 data class AppSettings(
+    val appMode: AppMode = AppMode.API_ONLY,
     val themeMode: ThemeMode = ThemeMode.DARK,
     val dynamicColor: Boolean = false,
     val editorFontSize: Int = 14,
@@ -102,6 +104,7 @@ class SettingsStore(context: Context) {
     val favorites: StateFlow<Set<String>> = _favorites.asStateFlow()
 
     private fun read() = AppSettings(
+        appMode = runCatching { AppMode.valueOf(prefs.getString("appMode", AppMode.API_ONLY.name)!!) }.getOrDefault(AppMode.API_ONLY),
         themeMode = runCatching { ThemeMode.valueOf(prefs.getString("theme", "DARK")!!) }.getOrDefault(ThemeMode.DARK),
         dynamicColor = prefs.getBoolean("dynamic", false),
         editorFontSize = prefs.getInt("fontSize", 14),
@@ -114,7 +117,7 @@ class SettingsStore(context: Context) {
     fun update(block: (AppSettings) -> AppSettings) {
         val s = block(_settings.value)
         prefs.edit()
-            .putString("theme", s.themeMode.name).putBoolean("dynamic", s.dynamicColor)
+            .putString("appMode", s.appMode.name).putString("theme", s.themeMode.name).putBoolean("dynamic", s.dynamicColor)
             .putInt("fontSize", s.editorFontSize).putInt("tabSize", s.tabSize)
             .putBoolean("wrap", s.wordWrap).putBoolean("notifyRuns", s.notifyRuns)
             .putBoolean("reduceMotion", s.reduceMotion).apply()

@@ -32,6 +32,7 @@ import com.kagglecontroller.core.common.ApiSupport
 import com.kagglecontroller.core.common.Capabilities
 import com.kagglecontroller.core.ui.components.OpenInKaggleButton
 import com.kagglecontroller.core.ui.rememberContainer
+import com.kagglecontroller.data.local.AppMode
 import com.kagglecontroller.data.local.ThemeMode
 
 /** Settings + account + the live feature-support map, so users always know what the API can do. */
@@ -50,6 +51,37 @@ fun MoreScreen(username: String?, verified: Boolean, onSignOut: () -> Unit) {
                     Text(username ?: "Unknown", style = MaterialTheme.typography.bodyLarge)
                     Text(if (verified) "Connected to Kaggle" else "Offline: token not re-checked yet", style = MaterialTheme.typography.bodySmall)
                     OutlinedButton(onClick = { confirmOut = true }) { Text("Sign out and remove token") }
+                }
+            }
+        }
+        item {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Workspace mode", style = MaterialTheme.typography.titleMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = s.appMode == AppMode.API_ONLY,
+                            onClick = { c.settings.update { it.copy(appMode = AppMode.API_ONLY) } },
+                            label = { Text("API only") },
+                        )
+                        FilterChip(
+                            selected = s.appMode == AppMode.FULL,
+                            onClick = { c.settings.update { it.copy(appMode = AppMode.FULL) } },
+                            label = { Text("Full mode") },
+                        )
+                    }
+                    Text(
+                        if (s.appMode == AppMode.FULL) {
+                            "Website-only tools open in a secure browser tab over the app. Kaggle and Google sign-in use your browser session, separate from your API token. Use the browser menu to request the desktop site on phones."
+                        } else {
+                            "API-only mode keeps website actions in your browser. The in-app notebook list, editor, logs, and API controls stay available."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (s.appMode == AppMode.FULL) {
+                        OpenInKaggleButton("https://www.kaggle.com/code", label = "Open Kaggle workspace")
+                    }
                 }
             }
         }

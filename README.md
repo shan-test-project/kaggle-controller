@@ -13,16 +13,16 @@ Kotlin + Jetpack Compose + Material 3. No backend server: the phone talks straig
 | Area | Status |
 |---|---|
 | Sign in with a Kaggle API token (verified, then stored encrypted with Android Keystore) | Built |
-| Notebook list: search, mine/public, favorites, drafts, running, failed, pagination, pull-to-refresh | Built |
+| Notebook list: search, mine/public, favorites, drafts, running, failed, pagination, pull-to-refresh; tap a Kaggle notebook to open the editor and use its separate Logs action | Built |
 | New / import (.ipynb .py .r .rmd) / pull from Kaggle / delete (with confirmation) | Built |
-| Editor: cells, scripts, syntax highlighting, line numbers, undo/redo, find/replace, auto-indent, phone key toolbar, font and tab size | Built |
+| Editor: cells, scripts, syntax highlighting, line numbers, undo/redo, find/replace, auto-indent, phone key toolbar, font and tab size; wide screens use a larger split workspace | Built |
 | Local drafts: autosave, offline editing, labels (Saved locally / Syncing / Synced / Unsaved / Sync failed) | Built |
 | Save to Kaggle (quick save) and Save + Run (with confirmation dialog) | Built |
 | Run monitor: status, log snapshot, search, jump to error, auto-scroll, copy/share, backoff polling | Built |
 | Output files: list + download through Android DownloadManager | Built |
 | Run-finished notifications (best effort via WorkManager) | Built |
 | Explore: datasets, models, competitions (search, infinite scroll, Open in Kaggle) | Built |
-| Capability map + "Open in Kaggle" fallbacks | Built |
+| API-only / Full mode: external browser for API-only fallbacks; secure Chrome Custom Tabs for Full mode, with the system browser's signed-in session | Built |
 | Themes: system / light / dark / AMOLED, dynamic colour | Built |
 | Phone bottom navigation and tablet navigation rail; kaggle.com/code links open in the app | Built |
 | Datasets/models create+upload, competition submit, forums, benchmarks, workflows, AI assistant, diff viewer, resource monitor, command palette | **Not built yet** (see roadmap) |
@@ -79,10 +79,13 @@ Personal API tokens act as your account, so there are no per-scope choices today
 - **Run history** in the app only contains runs started from this app.
 - **Background notifications** use WorkManager. Android may delay them (Doze, battery saver). They do not control the run.
 
-## Website-only fallback
+## Website-only features
 
-Every unsupported action shows **Open in Kaggle**, opened in a Chrome Custom Tab. The registry is
-`core/common/Capabilities.kt`. The More tab shows it live.
+Choose **API only** or **Full mode** under More. API-only actions open Kaggle in the system browser.
+Full mode uses a secure Chrome Custom Tab over the app, so Kaggle and Google sign-in use the browser's
+existing session. The browser menu can request Kaggle's desktop site on phones. Website-only controls
+such as secrets, add-ons, and other Kaggle-hosted settings remain on Kaggle's site; they are not
+reimplemented through unsupported API calls. The capability registry is `core/common/Capabilities.kt`.
 
 ## Project layout
 

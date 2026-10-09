@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -67,6 +69,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -107,6 +110,7 @@ fun EditorScreen(draftId: String, onBack: () -> Unit, onOpenRun: (String) -> Uni
     val settings by rememberContainer().settings.settings.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val clipboard = LocalClipboardManager.current
+    val desktop = LocalConfiguration.current.screenWidthDp >= 760
 
     var menu by remember { mutableStateOf(false) }
     var showFind by rememberSaveable { mutableStateOf(false) }
@@ -145,6 +149,9 @@ fun EditorScreen(draftId: String, onBack: () -> Unit, onOpenRun: (String) -> Uni
                 },
                 actions = {
                     IconButton(onClick = { showFind = !showFind }) { Icon(Icons.Outlined.Search, contentDescription = "Find and replace") }
+                    if (desktop && draft != null) {
+                        IconButton(onClick = { confirmRun = true }) { Icon(Icons.Outlined.PlayArrow, contentDescription = "Run notebook") }
+                    }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, contentDescription = "More actions") }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text("Notebook settings") }, onClick = { menu = false; showSettings = true })
@@ -161,7 +168,7 @@ fun EditorScreen(draftId: String, onBack: () -> Unit, onOpenRun: (String) -> Uni
             )
         },
         bottomBar = {
-            if (draft != null) Column(Modifier.navigationBarsPadding().imePadding()) {
+            if (draft != null && !desktop) Column(Modifier.navigationBarsPadding().imePadding()) {
                 KeyToolbar(
                     canUndo = ui.canUndo, canRedo = ui.canRedo,
                     onKey = vm::insert, onTab = vm::insertTab, onIndent = vm::indentSelection,
@@ -187,14 +194,48 @@ fun EditorScreen(draftId: String, onBack: () -> Unit, onOpenRun: (String) -> Uni
                         onNext = { vm.findNext(findText) }, onReplaceAll = { vm.replaceAll(findText, replaceText) },
                     )
                     if (draft.kernelType == "notebook") {
-                        NotebookCells(vm, ui, draft, settings.editorFontSize, settings.wordWrap)
+                        if (desktop) {
+                            Row(Modifier.fillMaxSize().padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                NotebookCells(
+                                    vm, ui, draft, settings.editorFontSize, settings.wordWrap,
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                                    largeCells = true,
+                                )
+                                EditorDetails(
+                                    draft = draft,
+                                    modifier = Modifier.widthIn(min = 280.dp, max = 360.dp).fillMaxHeight(),
+                                    onSettings = { showSettings = true },
+                                    onRun = { confirmRun = true },
+                                )
+                            }
+                        } else {
+                            NotebookCells(vm, ui, draft, settings.editorFontSize, settings.wordWrap)
+                        }
                     } else {
-                        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
-                            CodeField(
-                                value = ui.active, onValueChange = vm::onActiveChange,
-                                language = draft.language, fontSizeSp = settings.editorFontSize, wrap = settings.wordWrap,
-                                modifier = Modifier.fillMaxWidth().heightIn(min = 400.dp),
-                            )
+                        if (desktop) {
+                            Row(Modifier.fillMaxSize().padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Column(Modifier.weight(1f).fillMaxHeight().padding(12.dp)) {
+                                    CodeField(
+                                        value = ui.active, onValueChange = vm::onActiveChange,
+                                        language = draft.language, fontSizeSp = settings.editorFontSize, wrap = settings.wordWrap,
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                }
+                                EditorDetails(
+                                    draft = draft,
+                                    modifier = Modifier.widthIn(min = 280.dp, max = 360.dp).fillMaxHeight(),
+                                    onSettings = { showSettings = true },
+                                    onRun = { confirmRun = true },
+                                )
+                            }
+                        } else {
+                            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp)) {
+                                CodeField(
+                                    value = ui.active, onValueChange = vm::onActiveChange,
+                                    language = draft.language, fontSizeSp = settings.editorFontSize, wrap = settings.wordWrap,
+                                    modifier = Modifier.fillMaxWidth().heightIn(min = 400.dp),
+                                )
+                            }
                         }
                     }
                 }
@@ -230,9 +271,17 @@ fun EditorScreen(draftId: String, onBack: () -> Unit, onOpenRun: (String) -> Uni
 }
 
 @Composable
-private fun NotebookCells(vm: EditorViewModel, ui: EditorUi, draft: LocalDraft, fontSize: Int, wrap: Boolean) {
+private fun NotebookCells(
+    vm: EditorViewModel,
+    ui: EditorUi,
+    draft: LocalDraft,
+    fontSize: Int,
+    wrap: Boolean,
+    modifier: Modifier = Modifier,
+    largeCells: Boolean = false,
+) {
     val focus = remember { FocusRequester() }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    LazyColumn(modifier, contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         itemsIndexed(ui.cells, key = { _, c -> c.id }) { index, cell ->
             val active = index == ui.activeIndex
             Column(
@@ -252,7 +301,7 @@ private fun NotebookCells(vm: EditorViewModel, ui: EditorUi, draft: LocalDraft, 
                         value = ui.active, onValueChange = vm::onActiveChange,
                         language = if (cell.type == CellType.MARKDOWN) "markdown" else draft.language,
                         fontSizeSp = fontSize, wrap = wrap, focusRequester = focus,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                        modifier = Modifier.fillMaxWidth().heightIn(min = if (largeCells) 180.dp else 56.dp),
                     )
                 } else {
                     // Inactive cells are cheap read-only previews: keeps long notebooks fast on low-end phones.
@@ -263,6 +312,42 @@ private fun NotebookCells(vm: EditorViewModel, ui: EditorUi, draft: LocalDraft, 
             }
         }
         item { TextButton(onClick = { vm.addCellBelow() }) { Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(6.dp)); Text("Add code cell") } }
+    }
+}
+
+@Composable
+private fun EditorDetails(
+    draft: LocalDraft,
+    modifier: Modifier = Modifier,
+    onSettings: () -> Unit,
+    onRun: () -> Unit,
+) {
+    Column(
+        modifier.background(MaterialTheme.colorScheme.surface).verticalScroll(rememberScrollState()).padding(18.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Text("NOTEBOOK", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+        Text(draft.title, style = MaterialTheme.typography.titleLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        HorizontalDivider()
+        Text("Runtime", style = MaterialTheme.typography.labelLarge)
+        Text(machineOptions.firstOrNull { it.first == draft.machineShape }?.second ?: "CPU only",
+            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Language", style = MaterialTheme.typography.labelLarge)
+        Text(draft.language.replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodyMedium)
+        Text("Datasets", style = MaterialTheme.typography.labelLarge)
+        Text(draft.datasetSources.takeIf { it.isNotEmpty() }?.joinToString("\n") ?: "None attached",
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(if (draft.enableInternet) "Internet enabled" else "Internet disabled",
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        OutlinedButton(onClick = onSettings, modifier = Modifier.fillMaxWidth()) { Text("Runtime settings") }
+        Button(onClick = onRun, modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.Outlined.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text("Run notebook")
+        }
+        draft.ref?.let { ref ->
+            OpenInKaggleButton("https://www.kaggle.com/code/$ref", Modifier.fillMaxWidth(), "Open Kaggle editor")
+        }
     }
 }
 

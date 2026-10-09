@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -28,6 +30,7 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +38,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -96,7 +100,12 @@ fun RunScreen(ref: String, onBack: () -> Unit, onEdit: (() -> Unit)?) {
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                title = { Text(ref, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium) },
+                title = {
+                    Column {
+                        Text("Logs", style = MaterialTheme.typography.titleMedium)
+                        Text(ref, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall)
+                    }
+                },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back") } },
                 actions = { IconButton(onClick = { scope.launch { vm.refresh() } }) { Icon(Icons.Outlined.Refresh, "Refresh now") } },
             )
@@ -118,8 +127,12 @@ fun RunScreen(ref: String, onBack: () -> Unit, onEdit: (() -> Unit)?) {
                 is ApiState.Error -> Text(e.message, color = KC.Danger)
                 else -> Unit
             }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                Text("Execution log", style = MaterialTheme.typography.titleMedium)
+                Text("${ui.files.size} output files", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
             Text(
-                "Kaggle exposes the run log as a snapshot, so it updates every few seconds rather than streaming line by line.",
+                "Kaggle provides log snapshots rather than a live stream. The app refreshes while this view is open.",
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
@@ -167,19 +180,65 @@ fun RunScreen(ref: String, onBack: () -> Unit, onEdit: (() -> Unit)?) {
 
 @Composable
 private fun LogView(lines: List<String>, state: LazyListState, modifier: Modifier) {
-    Column(modifier.clip(RoundedCornerShape(14.dp)).background(Color(0xFF050810)).padding(10.dp)) {
-        if (lines.isEmpty() || (lines.size == 1 && lines[0].isEmpty())) {
-            Text("Waiting for log output...", color = KC.TextDim, fontFamily = CodeFont, style = MaterialTheme.typography.bodySmall)
-        } else {
-            LazyColumn(state = state) {
-                itemsIndexed(lines) { _, line ->
-                    val isErr = line.contains("Traceback") || line.contains("Error")
-                    Text(line, fontFamily = CodeFont, style = MaterialTheme.typography.bodySmall, color = if (isErr) KC.Danger else KC.Text)
+    Surface(
+        modifier = modifier.clip(RoundedCornerShape(12.dp)),
+        color = Color(0xFF11141B),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    ) {
+        Column {
+            Row(
+                Modifier.fillMaxWidth().background(Color(0xFF1B1F29)).padding(horizontal = 10.dp, vertical = 9.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Text("Time", Modifier.width(62.dp), fontFamily = CodeFont, style = MaterialTheme.typography.labelSmall, color = KC.TextDim)
+                Text("#", Modifier.width(34.dp), fontFamily = CodeFont, style = MaterialTheme.typography.labelSmall, color = KC.TextDim)
+                Text("Log message", fontFamily = CodeFont, style = MaterialTheme.typography.labelSmall, color = KC.TextDim)
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+            if (lines.isEmpty() || (lines.size == 1 && lines[0].isEmpty())) {
+                Text(
+                    "Waiting for log output...",
+                    Modifier.padding(12.dp),
+                    color = KC.TextDim,
+                    fontFamily = CodeFont,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            } else {
+                LazyColumn(state = state, modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    itemsIndexed(lines) { index, line ->
+                        val timestamped = logTimeAndNumber.matchEntire(line)
+                        val timed = logTimePrefix.matchEntire(line)
+                        val time = timestamped?.groupValues?.get(1) ?: timed?.groupValues?.get(1) ?: "—"
+                        val lineNumber = timestamped?.groupValues?.get(2)?.toIntOrNull() ?: index + 1
+                        val message = timestamped?.groupValues?.get(3) ?: timed?.groupValues?.get(2) ?: line
+                        val isErr = line.contains("Traceback", ignoreCase = true) ||
+                            line.contains("Error", ignoreCase = true) ||
+                            line.contains("Exception", ignoreCase = true)
+                        Row(
+                            Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.Top,
+                        ) {
+                            Text(time, Modifier.width(62.dp), fontFamily = CodeFont, style = MaterialTheme.typography.bodySmall, color = KC.TextDim)
+                            Text(lineNumber.toString(), Modifier.width(34.dp), fontFamily = CodeFont, style = MaterialTheme.typography.bodySmall, color = KC.TextDim)
+                            Text(
+                                message,
+                                Modifier.weight(1f),
+                                fontFamily = CodeFont,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isErr) KC.Danger else KC.Text,
+                            )
+                        }
+                        if (index != lines.lastIndex) HorizontalDivider(color = Color(0xFF242A35))
+                    }
                 }
             }
         }
     }
 }
+
+private val logTimePrefix = Regex("^\\s*(\\d+(?:\\.\\d+)?s)\\s+(.*)$")
+private val logTimeAndNumber = Regex("^\\s*(\\d+(?:\\.\\d+)?s)\\s+(\\d+)\\s+(.*)$")
 
 private fun shareText(ctx: Context, subject: String, text: String) {
     val send = Intent(Intent.ACTION_SEND).apply {

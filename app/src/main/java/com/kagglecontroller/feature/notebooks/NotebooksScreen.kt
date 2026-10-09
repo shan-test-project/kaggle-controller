@@ -183,9 +183,10 @@ fun NotebooksScreen(
                                 onClick = {
                                     when {
                                         row.draftId != null -> onOpenEditor(row.draftId)
-                                        row.ref != null -> onOpenNotebook(row.ref)
+                                        row.ref != null -> pullToEditor(row.ref)
                                     }
                                 },
+                                onOpenLogs = { row.ref?.let(onOpenNotebook) },
                                 onLongClick = { sheet = row },
                             )
                             if (row === rows.lastOrNull() && filter.let { it == NotebookFilter.MINE || it == NotebookFilter.PUBLIC }) {
@@ -223,7 +224,7 @@ fun NotebooksScreen(
                     SheetAction("Delete local draft", danger = true) { sheet = null; confirmDelete = row }
                 }
                 if (row.ref != null) {
-                    SheetAction("Open run view, log and outputs") { sheet = null; onOpenNotebook(row.ref) }
+                    SheetAction("Open logs and outputs") { sheet = null; onOpenNotebook(row.ref) }
                     SheetAction("Download to editor (pull)") { sheet = null; pullToEditor(row.ref) }
                     SheetAction(if (row.ref in favorites) "Remove from favorites" else "Add to favorites") { sheet = null; vm.toggleFavorite(row.ref) }
                     if (row.isMine) SheetAction("Delete on Kaggle", danger = true) { sheet = null; confirmDelete = row }
@@ -256,26 +257,42 @@ fun NotebooksScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun NotebookCard(row: NbRow, favorite: Boolean, onToggleFavorite: () -> Unit, onClick: () -> Unit, onLongClick: () -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface)
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
+private fun NotebookCard(
+    row: NbRow,
+    favorite: Boolean,
+    onToggleFavorite: () -> Unit,
+    onClick: () -> Unit,
+    onOpenLogs: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surface),
     ) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(row.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(row.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            if (row.run != null || row.syncLabel != null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    row.run?.let { StatusPill(it.runStatus) }
-                    row.syncLabel?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = KC.Cyan) }
+        Row(
+            Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(row.title, style = MaterialTheme.typography.titleMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(row.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (row.run != null || row.syncLabel != null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        row.run?.let { StatusPill(it.runStatus) }
+                        row.syncLabel?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = KC.Cyan) }
+                    }
                 }
             }
+            if (row.ref != null) IconButton(onClick = onToggleFavorite) {
+                Icon(if (favorite) Icons.Outlined.Star else Icons.Outlined.StarBorder,
+                    contentDescription = if (favorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (favorite) KC.Warning else MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
-        if (row.ref != null) IconButton(onClick = onToggleFavorite) {
-            Icon(if (favorite) Icons.Outlined.Star else Icons.Outlined.StarBorder,
-                contentDescription = if (favorite) "Remove from favorites" else "Add to favorites",
-                tint = if (favorite) KC.Warning else MaterialTheme.colorScheme.onSurfaceVariant)
+        if (row.ref != null) {
+            Row(Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 6.dp), horizontalArrangement = Arrangement.End) {
+                row.webUrl?.let { OpenInKaggleButton(it, label = "Kaggle site") }
+                TextButton(onClick = onOpenLogs) { Text("Logs") }
+            }
         }
     }
 }
